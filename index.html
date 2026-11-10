@@ -1,0 +1,449 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#f5f7fa">
+<title>Planning Samira</title>
+
+<style>
+:root{
+--navy:#172b4d;--blue:#3569a8;--blue-light:#edf3fb;
+--green:#28784b;--green-light:#eaf5ed;
+--text:#202b3c;--muted:#7b8798;--line:#e8ecf1;
+--bg:#f5f7fa;--white:#fff
+}
+*{box-sizing:border-box}
+body{
+margin:0;background:var(--bg);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+-webkit-font-smoothing:antialiased
+}
+.app{max-width:540px;margin:auto;padding:22px 18px 35px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin:10px 0 28px}
+.brand{font-size:19px;font-weight:800;color:var(--navy)}
+.brand span{color:var(--blue)}
+.day-label{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-light);padding:8px 12px;border-radius:20px}
+.greeting{margin-bottom:22px}
+.greeting h1{font-size:27px;letter-spacing:-1px;margin:0 0 5px;color:var(--navy)}
+.greeting p{color:var(--muted);font-size:14px;margin:0;text-transform:capitalize}
+.clock-card,.next-card,.timeline-card{
+background:var(--white);border:1px solid var(--line);
+border-radius:19px;padding:19px 20px;margin-bottom:17px
+}
+.clock-label,.section-label{color:var(--muted);font-size:10px;font-weight:800;letter-spacing:1.2px}
+.clock{font-size:43px;font-weight:750;color:var(--navy);letter-spacing:-1.5px;margin-top:5px;font-variant-numeric:tabular-nums}
+.clock-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:5px;color:var(--muted);font-size:12px}
+.live{color:var(--green);font-weight:700}
+.live:before{content:"";display:inline-block;width:7px;height:7px;background:#36a66a;border-radius:50%;margin-right:6px}
+.section-label{margin:25px 0 11px}
+.current-card{background:var(--green-light);border:1px solid #d6eadc;border-radius:19px;padding:20px;margin-bottom:13px}
+.card-heading{display:flex;justify-content:space-between;align-items:center}
+.card-label{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--green)}
+.status-pill{font-size:10px;background:white;color:var(--green);padding:6px 10px;border-radius:20px;font-weight:800}
+.task-title{font-size:24px;font-weight:800;color:var(--navy);margin:18px 0 7px;letter-spacing:-.7px}
+.task-hours{color:#66766d;font-size:13px}
+.progress-track{height:5px;background:#d5e6d9;border-radius:10px;overflow:hidden;margin-top:19px}
+.progress-fill{height:100%;width:0;background:var(--green);border-radius:10px;transition:width .5s}
+.progress-caption{display:flex;justify-content:space-between;font-size:11px;color:#668171;margin-top:8px}
+.next-card .card-label{color:var(--blue)}
+.next-title{font-size:21px;font-weight:800;color:var(--navy);margin:15px 0 5px}
+.next-hours{font-size:13px;color:var(--muted)}
+.next-countdown{display:inline-block;margin-top:13px;padding:8px 11px;border-radius:9px;background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:800}
+.timeline-card{padding:20px 17px}
+.timeline-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:19px}
+.timeline-header h2{color:var(--navy);font-size:17px;margin:0}
+.timeline-header span{color:var(--muted);font-size:11px}
+.timeline-item{display:flex;position:relative;gap:12px;min-height:67px}
+.timeline-item:not(:last-child):after{content:"";position:absolute;left:66px;top:34px;bottom:-2px;width:1px;background:var(--line)}
+.timeline-time{width:51px;flex-shrink:0;padding-top:8px;font-size:12px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.timeline-dot{width:30px;height:30px;flex-shrink:0;display:flex;justify-content:center;align-items:center;background:#f0f3f7;border-radius:9px;z-index:1;font-size:15px}
+.timeline-info{padding:5px 0 12px;flex:1}
+.timeline-name{font-size:13px;font-weight:650;color:var(--text)}
+.timeline-end{font-size:10px;color:var(--muted);margin-top:4px}
+.timeline-item.active .timeline-dot{background:var(--green-light);outline:1px solid #d6eadc}
+.timeline-item.active .timeline-name,.timeline-item.active .timeline-time{color:var(--green);font-weight:800}
+.timeline-item.upcoming .timeline-dot{background:var(--blue-light)}
+.timeline-item.upcoming .timeline-name{color:var(--blue)}
+.timeline-item.past{opacity:.48}
+.special{background:white;border:1px solid var(--line);border-radius:20px;padding:40px 22px;text-align:center;margin-top:25px}
+.special-icon{font-size:47px;margin-bottom:16px}
+.special h2{color:var(--navy);font-size:22px;margin:0 0 10px}
+.special p{color:var(--muted);font-size:14px;line-height:1.6;margin:0}
+.special-date{margin-top:17px;color:var(--blue);font-size:12px;font-weight:700}
+.hidden{display:none!important}
+.footer{text-align:center;color:#a2adbb;font-size:10px;margin-top:25px}
+@media(max-width:380px){.app{padding:16px 13px 30px}.clock{font-size:37px}.task-title{font-size:21px}}
+</style>
+</head>
+
+<body>
+<main class="app">
+
+<div class="topbar">
+<div class="brand">SAMIRA<span>.</span></div>
+<div class="day-label" id="dayLabel">PLANNING</div>
+</div>
+
+<div class="greeting">
+<h1>Bonjour Samira</h1>
+<p id="date">Chargement...</p>
+</div>
+
+<section class="clock-card">
+<div class="clock-label">HEURE ACTUELLE</div>
+<div class="clock" id="clock">--:--:--</div>
+<div class="clock-bottom">
+<span>Heure locale</span>
+<span class="live">En direct</span>
+</div>
+</section>
+
+<div id="workContent">
+<div class="section-label">AFFECTATION ACTUELLE</div>
+
+<section class="current-card">
+<div class="card-heading">
+<span class="card-label">POSTE EN COURS</span>
+<span class="status-pill" id="currentStatus">EN COURS</span>
+</div>
+<div class="task-title" id="currentTask"></div>
+<div class="task-hours" id="currentHours"></div>
+<div class="progress-track">
+<div class="progress-fill" id="progressFill"></div>
+</div>
+<div class="progress-caption">
+<span id="progressStart"></span>
+<span id="progressPercent"></span>
+</div>
+</section>
+
+<div class="section-label">À VENIR</div>
+<section class="next-card">
+<div class="card-label">PROCHAINE AFFECTATION</div>
+<div class="next-title" id="nextTask"></div>
+<div class="next-hours" id="nextHours"></div>
+<div class="next-countdown" id="countdown"></div>
+</section>
+
+<div class="section-label">ORGANISATION DE LA JOURNÉE</div>
+<section class="timeline-card">
+<div class="timeline-header">
+<h2>Programme du jour</h2>
+<span id="timelineDay"></span>
+</div>
+<div id="timeline"></div>
+</section>
+</div>
+
+<section class="special hidden" id="special">
+<div class="special-icon" id="specialIcon"></div>
+<h2 id="specialTitle"></h2>
+<p id="specialText"></p>
+<div class="special-date" id="specialDate"></div>
+</section>
+
+<div class="footer">EMPLOIS DU TEMPS SAMIRA · VERSION 1.1</div>
+</main>
+
+<script>
+
+// ===================================
+// PLANNING DU LUNDI
+// ===================================
+
+const lundi={
+name:"Lundi",start:"07:40",end:"17:40",
+tasks:[
+["07:40","⚽","Cour"],
+["08:00","🚶‍♂️🏢","Couloirs"],
+["08:55","🚧","Grille"],
+["09:00","🏫👨‍🏫","Permanence 2"],
+["09:50","🚶‍♂️🏢","Hall / couloirs"],
+["10:10","🖥️📋","Bureau 2"],
+["11:00","⚽","Cour"],
+["11:30","🍽️","Self"],
+["12:05","🍽️","Self"],
+["13:20","⚽","Cour"],
+["13:30","😴💤","Pause"],
+["14:00","🖥️📋","Bureau 2"],
+["14:20","🚧","Grille"],
+["14:30","🚶‍♂️🏢","Couloirs"],
+["15:20","⚽","Cour"],
+["15:40","🏫👨‍🏫","Permanence"],
+["16:30","🚶‍♂️🏢","Hall / couloirs"],
+["16:40","🖥️📋","Bureau 2"],
+["17:35","🚧","Grille"]
+]};
+
+// ===================================
+// PLANNING DU MARDI
+// ===================================
+
+const mardi={
+name:"Mardi",start:"07:40",end:"17:40",
+tasks:[
+["07:40","🖥️📋","Bureau"],
+["11:30","☎️🍽️","Appel cantine"],
+["12:05","⚽","Cour"],
+["13:30","😴💤","Pause"],
+["14:00","🖥️📋","Bureau"],
+["17:35","🚧","Grille"]
+]};
+
+// ===================================
+// PLANNING DU JEUDI
+// ===================================
+
+const jeudi={
+name:"Jeudi",start:"07:40",end:"17:40",
+tasks:[
+["07:40","🚧","Grille"],
+["08:00","🖥️📋","Bureau 2"],
+["08:55","⚽","Cour"],
+["09:00","🏫👨‍🏫","Permanence"],
+["09:50","⚽","Cour"],
+["10:10","🖥️📋","Bureau 2"],
+["11:00","😴💤","Pause"],
+["11:30","🍽️","Self"],
+["12:05","🚧","Grille"],
+["13:20","⚽","Cour"],
+["13:30","🏫👨‍🏫","Permanence"],
+["14:20","⚽","Cour"],
+["14:30","🖥️📋","Bureau 2"],
+["15:20","🚧","Grille"],
+["15:40","🚶‍♂️🏢","Couloirs"],
+["16:30","🚶‍♂️🏢","Hall / couloirs"],
+["16:40","🏫👨‍🏫","Permanence"],
+["17:35","🚧","Grille"]
+]};
+
+// ===================================
+// PLANNING DU VENDREDI
+// ===================================
+
+const vendredi={
+name:"Vendredi",start:"07:40",end:"17:40",
+tasks:[
+["07:40","⚽","Cour"],
+["08:00","🏫👨‍🏫","Permanence"],
+["08:55","🖥️📋","Bureau 2"],
+["09:00","🏫👨‍🏫","Permanence 2"],
+["09:50","⚽","Cour"],
+["10:10","💻","Suivi classe"],
+["11:00","😴💤","Pause"],
+["11:30","🍽️","Self"],
+["12:05","🚧","Grille"],
+["13:20","⚽","Cour"],
+["13:30","📖✍️","DF 603 (HG2)"],
+["14:20","🚶‍♂️🏢","Hall / couloirs"],
+["14:30","🏫👨‍🏫","Permanence 2"],
+["15:20","🚧","Grille"],
+["15:40","🖥️📋","Bureau 2"],
+["16:30","🚶‍♂️🏢","Hall / couloirs"],
+["16:40","🏫👨‍🏫","Permanence"],
+["17:35","🚧","Grille"]
+]};
+
+// ===================================
+// VACANCES ZONE C 2026-2027
+// ===================================
+
+const vacances=[
+{nom:"Vacances de la Toussaint",debut:"2026-10-17",fin:"2026-11-02"},
+{nom:"Vacances de Noël",debut:"2026-12-19",fin:"2027-01-04"},
+{nom:"Vacances d'hiver",debut:"2027-02-06",fin:"2027-02-22"},
+{nom:"Vacances de printemps",debut:"2027-04-03",fin:"2027-04-19"},
+{nom:"Vacances d'été",debut:"2027-07-03",fin:"2027-09-01"}
+];
+
+const joursSansClasse=["2027-05-07"];
+
+// ===================================
+// FONCTIONS
+// ===================================
+
+function mins(t){
+const [h,m]=t.split(":").map(Number);
+return h*60+m;
+}
+
+function heure(m){
+const h=Math.floor(m/60);
+const mm=m%60;
+return String(h).padStart(2,"0")+":"+String(mm).padStart(2,"0");
+}
+
+function iso(d){
+return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function afficherDate(d){
+return d.toLocaleDateString("fr-FR",{
+weekday:"long",day:"numeric",month:"long",year:"numeric"
+});
+}
+
+function special(icon,title,txt,extra=""){
+document.getElementById("workContent").classList.add("hidden");
+document.getElementById("special").classList.remove("hidden");
+document.getElementById("specialIcon").textContent=icon;
+document.getElementById("specialTitle").textContent=title;
+document.getElementById("specialText").textContent=txt;
+document.getElementById("specialDate").textContent=extra;
+}
+
+function current(title,hours,status,progress,start,remaining){
+document.getElementById("currentTask").textContent=title;
+document.getElementById("currentHours").textContent=hours;
+document.getElementById("currentStatus").textContent=status;
+document.getElementById("progressFill").style.width=Math.max(0,Math.min(100,progress))+"%";
+document.getElementById("progressStart").textContent=start?"Début "+heure(start):"";
+document.getElementById("progressPercent").textContent=remaining||"";
+}
+
+function next(task,remaining){
+document.getElementById("nextTask").textContent=task[1]+" "+task[2];
+document.getElementById("nextHours").textContent="Début à "+task[0];
+document.getElementById("countdown").textContent="⏳ Dans "+remaining+" minute(s)";
+}
+
+// ===================================
+// AFFICHAGE CHRONOLOGIQUE
+// ===================================
+
+function render(tasks,now,end){
+let html="";
+
+tasks.forEach((task,i)=>{
+const debut=mins(task[0]);
+const fin=i+1<tasks.length?mins(tasks[i+1][0]):end;
+
+let state="upcoming";
+if(now>=fin)state="past";
+else if(now>=debut)state="active";
+
+html+=`
+<div class="timeline-item ${state}">
+<div class="timeline-time">${task[0]}</div>
+<div class="timeline-dot">${task[1]}</div>
+<div class="timeline-info">
+<div class="timeline-name">${task[2]}</div>
+<div class="timeline-end">Jusqu'à ${heure(fin)}</div>
+</div>
+</div>`;
+});
+
+document.getElementById("timeline").innerHTML=html;
+}
+
+// ===================================
+// ACTUALISATION EN DIRECT
+// ===================================
+
+function update(){
+
+const now=new Date();
+const today=iso(now);
+const day=now.getDay();
+const currentMinutes=now.getHours()*60+now.getMinutes();
+
+document.getElementById("clock").textContent=now.toLocaleTimeString("fr-FR");
+document.getElementById("date").textContent=afficherDate(now);
+document.getElementById("dayLabel").textContent=
+now.toLocaleDateString("fr-FR",{weekday:"long"}).toUpperCase();
+
+const holiday=vacances.find(v=>today>=v.debut&&today<v.fin);
+
+if(holiday){
+special("🏖️","Vacances scolaires",holiday.nom+". Aucun planning aujourd'hui.",
+"Zone C · Reprise le "+new Date(holiday.fin+"T12:00:00").toLocaleDateString("fr-FR"));
+return;
+}
+
+if(joursSansClasse.includes(today)){
+special("🎉","Aucun planning aujourd'hui","Journée sans classe.");
+return;
+}
+
+let planning=null;
+if(day===1)planning=lundi;
+if(day===2)planning=mardi;
+if(day===4)planning=jeudi;
+if(day===5)planning=vendredi;
+
+if(!planning){
+special("📅","Aucun planning aujourd'hui",
+"Les emplois du temps sont disponibles le lundi, mardi, jeudi et vendredi.");
+return;
+}
+
+document.getElementById("special").classList.add("hidden");
+document.getElementById("workContent").classList.remove("hidden");
+document.getElementById("timelineDay").textContent=planning.name;
+
+const start=mins(planning.start);
+const end=mins(planning.end);
+const tasks=planning.tasks;
+
+if(currentMinutes<start){
+current("Avant la prise de poste","Début de journée à "+planning.start,"EN ATTENTE",0,0,"En attente");
+next(tasks[0],mins(tasks[0][0])-currentMinutes);
+render(tasks,currentMinutes,end);
+return;
+}
+
+if(currentMinutes>=end){
+current("Journée terminée","Fin du service à "+planning.end,"TERMINÉ",100,0,"Terminé");
+document.getElementById("nextTask").textContent="Aucune autre affectation";
+document.getElementById("nextHours").textContent="Fin de journée";
+document.getElementById("countdown").textContent="✓ Journée terminée";
+render(tasks,currentMinutes,end);
+return;
+}
+
+let index=-1;
+
+for(let i=0;i<tasks.length;i++){
+const debut=mins(tasks[i][0]);
+const fin=i+1<tasks.length?mins(tasks[i+1][0]):end;
+if(currentMinutes>=debut&&currentMinutes<fin){
+index=i;
+break;
+}
+}
+
+if(index===-1){
+current("Aucune mission indiquée","Prochaine mission à "+tasks[0][0],"DISPONIBLE",0,0,"En attente");
+}else{
+const task=tasks[index];
+const debut=mins(task[0]);
+const fin=index+1<tasks.length?mins(tasks[index+1][0]):end;
+const progress=(currentMinutes-debut)/(fin-debut)*100;
+
+current(task[1]+" "+task[2],
+task[0]+" – "+heure(fin),
+"EN COURS",progress,debut,
+Math.ceil(fin-currentMinutes)+" min restantes");
+}
+
+const nextIndex=tasks.findIndex(t=>mins(t[0])>currentMinutes);
+
+if(nextIndex!==-1){
+next(tasks[nextIndex],mins(tasks[nextIndex][0])-currentMinutes);
+}else{
+document.getElementById("nextTask").textContent="Aucune autre affectation";
+document.getElementById("nextHours").textContent="Fin à "+planning.end;
+document.getElementById("countdown").textContent="✓ Dernière mission";
+}
+
+render(tasks,currentMinutes,end);
+}
+
+update();
+setInterval(update,1000);
+
+</script>
+</body>
+</html>
